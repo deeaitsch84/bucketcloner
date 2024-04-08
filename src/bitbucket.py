@@ -1,8 +1,5 @@
-import argparse
 import os
-import shutil
-import sys
-from typing import Union, List, Optional
+from typing import Union, Optional
 
 import git
 import requests
@@ -33,8 +30,9 @@ def add_credentials(url: str, user: str, password: str) -> Union[str, None]:
     return url
 
 
-def _clone_bitbucket_workspace(user: str, password: str, workspace: str, repositories: list[str] = None) -> None:
-    """Cloning all repositories
+def clone_workspace(user: str, password: str, workspace: str, repositories: list[str]) -> None:
+    """
+    Cloning all repositories
 
     Args:
         user (str): username
@@ -44,7 +42,6 @@ def _clone_bitbucket_workspace(user: str, password: str, workspace: str, reposit
     """
 
     url = f'https://api.bitbucket.org/2.0/repositories/{workspace}?pagelen=10'
-
 
     while (resp := requests.get(url, auth=(user, password))).status_code == 200:
         jresp = resp.json()
@@ -64,7 +61,7 @@ def _clone_bitbucket_workspace(user: str, password: str, workspace: str, reposit
                     continue
 
                 already_exists = os.path.exists(f'{workspace}/{repo["name"]}')
-                skip = repositories is not None and repo["name"] not in repositories
+                skip = repositories and repo["name"] not in repositories
 
                 if skip:
                     print(f'Skipping {workspace}/{repo["name"]} because it is not in the list of repositories.')
@@ -87,8 +84,9 @@ def _clone_bitbucket_workspace(user: str, password: str, workspace: str, reposit
         print(f'The url {url} returned status code {resp.status_code}.')
 
 
-def clone_bitbucket(user: str, password: str, workspaces: Union[str, None], repositories: Optional[str] = None) -> None:
-    """Cloning all repositories
+def clone_bitbucket(user: str, password: str, workspaces: Union[str, None], repositories: list[str]) -> None:
+    """
+    Cloning all repositories
 
     Args:
         user (str): username
@@ -100,22 +98,19 @@ def clone_bitbucket(user: str, password: str, workspaces: Union[str, None], repo
     print(f'Fetching workspaces {user} {password}')
 
     if workspaces is None:
-        workspaces = [w['slug'] for w in list_bitbucket_workspaces(user, password)]
+        workspaces = [w['slug'] for w in list_workspaces(user, password)]
     else:
         workspaces = workspaces.split(',')
-
-    if repositories is not None:
-        repositories = repositories.split(',')
-
 
     for workspace in workspaces:
         if not os.path.exists(workspace):
             os.mkdir(workspace)
-        _clone_bitbucket_workspace(user, password, workspace, repositories)
+        clone_workspace(user, password, workspace, repositories)
 
 
-def list_bitbucket_workspaces(user: str, password: str) -> list:
-    """List all workspaces
+def list_workspaces(user: str, password: str) -> list:
+    """
+    List all workspaces
 
     Args:
         user (str): username
@@ -147,30 +142,3 @@ def list_bitbucket_workspaces(user: str, password: str) -> list:
         print(f'The url {url} returned status code {resp.status_code}.')
 
     return workspaces
-
-
-def main(args: List[str]):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--user', help='Username', required=True)
-    parser.add_argument('-p', '--password', help='App password', required=True)
-    parser.add_argument('-w', '--workspace', help='Workspace name(s), separated by comma')
-    parser.add_argument('-r', '--repository', help='Repository name(s), separated by comma')
-    parser.add_argument('command', help='Command', choices=['clone', 'workspace'])
-
-    namespace = parser.parse_args(args)
-
-    if namespace.command == 'clone':
-        clone_bitbucket(namespace.user, namespace.password, namespace.workspace, namespace.repository)
-
-    elif namespace.command == 'workspace':
-        workspaces = list_bitbucket_workspaces(namespace.user, namespace.password)
-        for w in workspaces:
-            print(f'{w["name"]} ({w["slug"]}) - {w["url"]}')
-
-
-def entry_point():
-    main(sys.argv[1:])
-
-
-if __name__ == '__main__':
-    entry_point()

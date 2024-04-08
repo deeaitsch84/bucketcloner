@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/bucketcloner.iml" filepath="$PROJECT_DIR$/.idea/bucketcloner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../devops/k8s-cluster/.idea/k8s-cluster.iml" filepath="$PROJECT_DIR$/../../devops/k8s-cluster/.idea/k8s-cluster.iml" />
     </modules>
   </component>
 </project>

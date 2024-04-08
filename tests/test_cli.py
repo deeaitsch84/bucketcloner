@@ -1,7 +1,7 @@
 import unittest
 import argparse
 
-from src.bucketcloner import main
+from src.main import main
 
 
 class TestCLI(unittest.TestCase):

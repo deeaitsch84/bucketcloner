@@ -4,5 +4,6 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/alemo/kmbm-sf-cloud-print" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/alemo/kmsc-website" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../devops/k8s-cluster" vcs="Git" />
   </component>
 </project>
