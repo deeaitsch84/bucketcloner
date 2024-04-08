@@ -33,7 +33,7 @@ def add_credentials(url: str, user: str, password: str) -> Union[str, None]:
     return url
 
 
-def _clone_bitbucket_workspace(user: str, password: str, workspace: str, skip_existing: bool = True, project: Optional[str] = None) -> None:
+def _clone_bitbucket_workspace(user: str, password: str, workspace: str, skip_existing: bool = True, project: Optional[str] = None, fetch_existing: bool = True) -> None:
     """Cloning all repositories
 
     Args:
@@ -65,6 +65,11 @@ def _clone_bitbucket_workspace(user: str, password: str, workspace: str, skip_ex
                 print(f'Cloning {repo["name"]} from {repo_url} into {workspace}.')
                 if os.path.exists(f'{workspace}/{repo["name"]}'):
                     if skip_existing:
+                        if fetch_existing:
+                            print(f'Fetching {workspace}/{repo["name"]} because it already exists.')
+                            repo = git.Repo(f'{workspace}/{repo["name"]}')
+                            repo.remotes.origin.fetch()
+
                         print(f'Skipping {workspace}/{repo["name"]} because it already exists.')
                         continue
                     else:
